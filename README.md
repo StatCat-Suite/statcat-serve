@@ -54,7 +54,8 @@ statcat-serve is pre-1.0: until 1.0, a minor release may break the API.
 ## Development
 
 Run once per clone. It installs a pre-push hook that runs the full gate, and
-the hook is the only gate, since the repository has no GitHub Actions workflow:
+the hook is the only gate for tests and lint, since the one GitHub Actions
+workflow only deploys the docs site:
 
 ```bash
 just hooks-install     # git config core.hooksPath .githooks
@@ -73,11 +74,10 @@ just docs              # local docs server
 The integration and object-store test tiers that statcatlib runs return here
 when Phase 6 writes their first tests.
 
-The repository is private for now. Private repositories use the organisation's
-GitHub Actions minutes, and GitHub Pages needs a public repository, so
-`.github/workflows/docs.yml` arrives when the repository is made public. Until
-then `just ci` builds the docs site with `mkdocs build --strict`, and nothing
-deploys it.
+The repository is public. `.github/workflows/docs.yml` deploys the docs site to
+<https://statcat-suite.github.io/statcat-serve/> on each push to `main` that
+changes the site's sources. `just ci` builds the same site with
+`mkdocs build --strict`.
 
 `uv.lock` is not committed: consumers resolve against `pyproject.toml`, and a
 lockfile would record whichever index resolved it. `just check-indexes` fails

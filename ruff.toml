@@ -1,0 +1,79 @@
+indent-width = 4
+line-length = 120
+target-version = "py314"
+
+[format]
+docstring-code-format = true
+docstring-code-line-length = 88
+indent-style = "space"
+line-ending = "auto"
+quote-style = "double"
+skip-magic-trailing-comma = false
+
+[lint]
+select = ["ALL"]
+ignore = [
+  # ── Docstring style conflicts ─────────────────────────────────────────────
+  # Google convention uses D211 (no blank before class docstring) + D212 (summary on first line)
+  "D203", # one-blank-line-before-class — conflicts with D211
+  "D213", # multi-line-summary-second-line — conflicts with D212
+
+  # ── Formatter conflicts ───────────────────────────────────────────────────
+  "COM812", # missing-trailing-comma — handled by formatter
+  "ISC001", # single-line-implicit-string-concatenation — handled by formatter
+
+  # ── Type annotations ──────────────────────────────────────────────────────
+  # ANN401 is ignored as in statcatlib, whose 44 findings keep it off there.
+  # sdmxlib runs it on everywhere. statcat-serve has no finding, so the owner
+  # can turn it on; `just check-any` holds `Any` at 0 meanwhile.
+  "ANN401", # any-type — see above
+  "FA",     # flake8-future-annotations — Python 3.12+, no __future__ needed
+
+  # ── Docstring style ───────────────────────────────────────────────────────
+  "D105", # undocumented-magic-method — dunder methods are self-evident (__iter__, __len__, etc.)
+  "D107", # undocumented-public-init — Google style documents __init__ in class docstring
+
+  # ── Pylint noise ─────────────────────────────────────────────────────────
+  "PLR0911", # too-many-return-statements — dispatch functions are idiomatic with many returns
+  "PLR0913", # too-many-arguments — triggered by dataclasses with many fields
+  "PLR0917", # too-many-positional-arguments — newly enforced by ruff 0.16; same reasoning as PLR0913
+  "PLR2004", # magic-value-comparison — too noisy in practice
+
+  # ── Active development ────────────────────────────────────────────────────
+  "TD",  # flake8-todos — don't enforce TODO format during development
+  "FIX", # flake8-fixme — same
+
+  # ── Misc ──────────────────────────────────────────────────────────────────
+  "CPY001", # missing-copyright-notice — not used in this project
+  "SIM108", # sometimes you might want to use either style
+  "ERA001", # commented out code can be noisey for if it is actually dead code
+  "TC",     # flake8-type-checking — lazy imports in 3.14 will make this unnecessary
+
+  # ── Suite decisions ───────────────────────────────────────────────────────
+  # SLF001 (private-member-access) cannot see package boundaries, so a module
+  # reading its own package's underscored helpers, or one instance reading
+  # another's private state in the same class, is flagged at every site.
+  # sdmxlib measured 40 suppressions and found no defect; statcatlib carried
+  # 51 of the same kind. Off suite-wide (StatCat-Suite/statcatlib#67,
+  # StatCat-Suite/sdmxlib#58).
+  "SLF001", # private-member-access — see above
+]
+
+[lint.per-file-ignores]
+# Init files: allow re-exports and unordered imports
+"__init__.py" = ["E402", "F401", "I"]
+# statcatlib scopes S608 to its three query compilers and B008 and FBT to its
+# Typer CLI. statcat-serve has neither yet, so those entries are left out; a
+# scoped ignore arrives with the module that needs it and the owner's sign-off.
+# Tests: skip docstrings, annotations, security checks, and unused-arg checks
+"tests/**/*.py" = ["D", "ANN", "S101", "ARG", "DTZ001", "PLC0415"]
+# tools/: developer scripts, run by `just`, not shipped — not an importable
+# package. T201 stays ON: the prints are scoped with `# noqa: T201` inline, as
+# they are in sdmxlib and statcatlib, so the copies of count_any.py stay comparable.
+"tools/**/*.py" = ["INP001"]
+
+[lint.pydocstyle]
+convention = "google"
+
+[lint.isort]
+known-first-party = ["statcat_serve"]

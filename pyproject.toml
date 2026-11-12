@@ -1,0 +1,102 @@
+[project]
+name = "statcat-serve"
+# 0.0.0 until the first release: `just release-3-pr` sets the version with
+# `uv version`, and git-cliff proposes 0.1.0 while the repository has no tag.
+version = "0.0.0"
+description = "The StatCat Suite's serving program: an SDMX-REST service over a sharded catalog of products and editions"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+readme = "README.md"
+authors = [
+    { name = "gabrielgellner", email = "gabrielgellner@gmail.com" }
+]
+requires-python = ">=3.14"
+keywords = ["sdmx", "sdmx-rest", "open-data", "catalog", "duckdb", "statistical-data"]
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Database",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+]
+dependencies = [
+    # Every suite library is pre-1.0, so a minor release may break its
+    # dependents. Each suite dependency is capped below its next minor, and
+    # the PR that adopts a new minor raises the cap
+    # (https://statcat-suite.github.io/conventions/#dependencies).
+    "sdmxlib>=0.88,<0.89",
+    "sdmxlib-rest>=0.10.3,<0.11",
+    "statcatlib>=0.18,<0.19",
+]
+
+[project.urls]
+Homepage = "https://github.com/StatCat-Suite/statcat-serve"
+Repository = "https://github.com/StatCat-Suite/statcat-serve"
+Documentation = "https://statcat-suite.github.io/statcat-serve"
+"Issue Tracker" = "https://github.com/StatCat-Suite/statcat-serve/issues"
+Changelog = "https://github.com/StatCat-Suite/statcat-serve/blob/main/CHANGELOG.md"
+
+[build-system]
+requires = ["uv_build>=0.11.6,<0.14.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "statcat_serve"
+
+[tool.pydoclint]
+style = "google"
+# Signatures carry the types; Google style keeps them out of the prose, and
+# the type checker reads the annotations. statcatlib's settings, unchanged.
+arg-type-hints-in-docstring = false
+check-style-mismatch = true
+# The annotation carries the return type too.
+check-return-types = false
+check-yield-types = false
+# Google style documents __init__'s arguments in either the class docstring or
+# __init__'s own.
+allow-init-docstring = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# `strict` makes an unregistered marker a collection error: a typo such as
+# `pytest.mark.uint` would otherwise drop a whole file out of `just ci`, which
+# selects by marker. It also rejects duplicate parametrize ids.
+strict = true
+# Every warning fails the test that raises it. A test asserts the warning its
+# setup provokes, or avoids it as a real caller would. No ignore list.
+filterwarnings = ["error"]
+# statcatlib also registers `integration`, `live` and `stores`. Each returns
+# here with the first test of its tier, in Phase 6.
+markers = [
+    "unit: fast, in-process tests with no network I/O",
+]
+
+[tool.coverage.run]
+source = ["src/statcat_serve"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+# statcatlib's floor. `just coverage` fails under it.
+fail_under = 85
+exclude_lines = [
+  "pragma: no cover",
+  "if TYPE_CHECKING:",
+  "raise NotImplementedError",
+  "@overload",
+]
+
+[dependency-groups]
+dev = [
+    "mkdocs-material>=9.7.6",
+    # The checkers are capped, as statcatlib's and sdmxlib's are: uv.lock is
+    # gitignored, so an uncapped checker's next release would change what
+    # `just ci` reports without a commit. A bump goes in its own PR, with its
+    # findings fixed.
+    "pydoclint>=0.11.1,<0.12",
+    "pyrefly>=1.4.0,<1.5",
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.17.1,<0.18",
+]

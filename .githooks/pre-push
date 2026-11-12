@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Local CI gate. The repository has no GitHub Actions workflow, so `just ci`
-# runs here: index guard, lint, format, docstrings, prose, the Any ratchet,
+# Local CI gate. The one GitHub Actions workflow only deploys the docs site,
+# so `just ci` runs here: index guard, lint, format, docstrings, prose, the Any ratchet,
 # typecheck, unit tests and the strict docs build.
 #
 # Install: just hooks-install

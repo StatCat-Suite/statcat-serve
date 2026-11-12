@@ -155,9 +155,10 @@ just coverage                  # unit tests with coverage; fails under 85% (pypr
 
 ### `just ci` is the gate, and it runs locally
 
-The repository has no GitHub Actions workflow, so a change merges on a green
-`just ci`. Never dispatch or re-run a GitHub Actions workflow: the
-organisation's Actions minutes are scarce.
+The one GitHub Actions workflow, `.github/workflows/docs.yml`, deploys the
+docs site and runs no tests or lint, so a change merges on a green `just ci`.
+Never dispatch or re-run a GitHub Actions workflow: the organisation's Actions
+minutes are scarce.
 
 The gate selects tests by marker (`-m unit`), so **every test file needs a
 `pytestmark`**: a file without one never runs in `just ci`. statcatlib's
@@ -169,7 +170,7 @@ pytest runs with `strict = true` and `filterwarnings = ["error"]`, and no
 ignore list. A test that sets up a situation the code warns about asserts the
 warning with `pytest.warns(match=...)`.
 
-**The pre-push hook is the gate**: `just hooks-install` runs
+**The pre-push hook is the only gate for tests and lint**: `just hooks-install` runs
 `git config core.hooksPath .githooks`, and every `git push` then runs
 `just ci` first. `core.hooksPath` is per-clone and cannot be set by a commit,
 so a fresh clone must run `just hooks-install` before its first push. Bypass
@@ -185,10 +186,10 @@ markers, copied from the hub's `docs/sites.md`. The hub also serves the
 stylesheet and favicon the block names by URL. Change the block in the hub
 first, then here; never only here.
 
-The repository is private for now. Private repositories use the organisation's
-Actions minutes, and GitHub Pages needs a public repository, so
-`.github/workflows/docs.yml` (statcatlib's is the model) arrives when the
-repository is made public. The hub's `docs/sites.md` lists the steps for
+The repository is public. `.github/workflows/docs.yml` (statcatlib's is the
+model) runs `just docs-build` and deploys the site to
+<https://statcat-suite.github.io/statcat-serve/> on each push to `main` that
+changes the site's sources. The hub's `docs/sites.md` lists the steps for
 adding the site.
 
 ### Designs

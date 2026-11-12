@@ -66,7 +66,7 @@ check-indexes:
 [group('dev')]
 check: check-indexes lint checkfmt check-docstrings check-prose check-any typecheck
 
-# Install the pre-push hook that runs `just ci` (the repository has no hosted CI)
+# Install the pre-push hook that runs `just ci` (hosted CI only builds docs)
 [group('dev')]
 hooks-install:
     #!/usr/bin/env bash
@@ -189,7 +189,7 @@ release-3-pr:
 release-4-merge:
     #!/usr/bin/env bash
     # Run from the release/vX branch, only after a green `just ci` on it:
-    # no hosted CI runs, so nothing else stands between this and main.
+    # hosted CI only builds docs, so nothing else stands between this and main.
     set -euo pipefail
     BRANCH=$(git branch --show-current)
     if [[ "${BRANCH}" != release/v* ]]; then
